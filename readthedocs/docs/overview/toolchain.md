@@ -1,6 +1,11 @@
-# 性能调优工具链全景
+---
+hide:
+  - navigation
+  - toc
+---
 
-本页从工具职责视角介绍 MindStudio Profiler Tools 中的核心工具，帮助你快速判断在不同场景下应该使用哪个工具。
+
+# 性能调优工具链全景
 
 <style>
 .ai-arch-container {
@@ -293,7 +298,31 @@ targets.forEach((target) => {
 });
 </script>
 
+## 工具链选择建议
+
+| 采集方式 | 特点 | 推荐场景 |
+| --- | --- | --- |
+| msprof命令行 | 功能全面，支持采集AI任务性能、系统数据，提供解析能力 | 各类训练/推理场景，特别是非PyTorch/MindSpore框架或需精细控制采集过程 |
+| torch_npu.profiler | API接口，对标PyTorch GPU生态，无缝迁移 | PyTorch框架模型的常规性能分析 |
+| mindspore.profiler | 与MindSpore深度集成，使用简单 | MindSpore框架模型的常规性能分析 |
+| dynamic_profile动态采集 | 可随时开启/停止，动态修改配置，无需改动脚本 | 启停成本高的场景（超大规模集群、长时间运行任务） |
+
+
+## 性能数据
+
+需要使用 `PyTorch Profiler` 或 `MindSpore Profiler` 采集。  
+
+| 数据类型            | 说明                                                                 |
+|------------------|--------------------------------------------------------------------|
+| Python调用栈        | 记录Python代码的执行过程，各个函数的调用关系与耗时情况。                                    |
+| AI框架层Trace       | 记录AI框架（如PyTorch）算子下发耗时。 AI框架层-->CANN层为第一级下发流水。                     |
+| CANN Trace       | 包含 AscendCL、GE、Runtime 组件以及 Node（算子）的耗时数据，CANN层-->Device为第二级下发流水。  |
+| Ascend Hardware  | 底层 NPU 数据，即任务调度信息。记录 AI 任务运行时，各个 Task 在不同加速器下的执行耗时以及 AI Core 性能指标。 |
+| Communication    | 记录各个通信域下的通信算子信息，包含通信带宽、数据传输量等信息。                                   |
+| Overlap Analysis | 按照NPU是否在执行通信或计算任务进行划分，拆解成计算、通信、通信未与计算掩盖、空闲这四个维度，评估计算与通信的并行效率       |
+
 ## 相关入口
+
 <style>
 .grid.cards .md-typeset hr {
     width: 100%;
@@ -338,31 +367,30 @@ targets.forEach((target) => {
 
     ---
 
-    采集 CANN 平台及昇腾 AI 处理器的软硬件性能数据
+    采集与解析 CANN 平台及昇腾 AI 处理器的软硬件性能数据。
 
 -   **[PyTorch Profiler](../torch_npu_profiler/)**
 
     ---
 
-    基于PyTorch框架开发的昇腾软硬件性能调优
+    基于PyTorch框架开发的昇腾软硬件性能调优工具。
 
 -   **[MSPTI](../mspti/)**
 
     ---
 
-    面向昇腾设备的 Profiling API 集合
+    面向昇腾设备的 Profiling API 集合。
 
 -   **[msMonitor](../msmonitor/)**
 
     ---
 
-    面向昇腾集群场景的在线性能监控与动态采集
+    面向昇腾集群场景的在线性能监控与动态采集工具。
 
 -   **[msprof-analyze](../msprof-analyze/)**
 
     ---
 
-    结果分析、性能对比和专家建议
+    面向 AI 训练与推理场景的性能分析工具，具备性能比对、集群分析、专家建议等功能。
 
 </div>
-
