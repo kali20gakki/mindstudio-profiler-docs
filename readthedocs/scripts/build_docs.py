@@ -151,7 +151,11 @@ def export_latest_branch(repo: Path, branch: str, source_subdir: str, destinatio
         extracted_root = Path(temp_dir) / "exported"
         extracted_root.mkdir(parents=True, exist_ok=True)
         with tarfile.open(archive_path) as archive:
-            archive.extractall(extracted_root)
+            # Python 3.14 changes the default extraction filter; prefer a safe mode now.
+            try:
+                archive.extractall(extracted_root, filter="data")
+            except TypeError:
+                archive.extractall(extracted_root)
 
         exported_source = extracted_root / source_subdir
         shutil.copytree(exported_source, destination)
@@ -163,6 +167,8 @@ def export_text_file(repo: Path, branch: str, repo_path: str) -> str:
         check=True,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     return completed.stdout
 
@@ -230,6 +236,8 @@ def repo_web_base(repo: Path) -> str:
         check=True,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     url = completed.stdout.strip()
     if url.endswith(".git"):
@@ -425,7 +433,9 @@ def write_tool_nav(path: Path, tool: dict) -> None:
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
-def rewrite_repo_readme_links(content: str, tool: dict, source_root: Path) -> str:
+def rewrite_repo_readme_links(content: str | None, tool: dict, source_root: Path) -> str:
+    if content is None:
+        content = ""
     replacements = {
         "./docs/zh/": "./source/",
         "docs/zh/": "source/",
