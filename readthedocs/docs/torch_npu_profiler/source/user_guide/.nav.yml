@@ -1,0 +1,8 @@
+collapse_single_pages: true
+nav:
+  - index.md
+  - profile_api.md
+  - dynamic_profile.md
+  - kineto_profile.md
+  - offline_analyse.md
+  - result_files_and_view.md

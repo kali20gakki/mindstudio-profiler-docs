@@ -1,0 +1,8 @@
+collapse_single_pages: true
+nav:
+  - index.md
+  - mstx.md
+  - memory_timeline.md
+  - child_thread_profiling.md
+  - environment_variables.md
+  - metadata.md

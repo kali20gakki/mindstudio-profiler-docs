@@ -1,0 +1,10 @@
+title: torch_npu.profiler
+nav:
+  - index.md
+  - source/getting_started/quick_start.md
+  - source/user_guide/profile_api.md
+  - source/user_guide/dynamic_profile.md
+  - source/user_guide/offline_analyse.md
+  - source/advanced_features/mstx.md
+  - source/reference/index.md
+  - source

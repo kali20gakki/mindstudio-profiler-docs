@@ -1,0 +1,29 @@
+version: 2
+
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.11"
+  jobs:
+    post_checkout:
+      - git submodule sync --recursive
+      - git submodule update --init --recursive
+      - git -C msprof fetch origin master && git -C msprof checkout --detach origin/master
+      - git -C mspti fetch origin master && git -C mspti checkout --detach origin/master
+      - git -C msmonitor fetch origin master && git -C msmonitor checkout --detach origin/master
+      - git -C msprof-analyze fetch origin master && git -C msprof-analyze checkout --detach origin/master
+    pre_build:
+      - python readthedocs/scripts/build_docs.py
+
+submodules:
+  include: all
+  recursive: true
+
+python:
+  install:
+    - requirements: readthedocs/requirements.txt
+
+mkdocs:
+  configuration: readthedocs/mkdocs.yml
+
+formats: []

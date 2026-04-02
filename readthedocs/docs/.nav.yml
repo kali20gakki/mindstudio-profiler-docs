@@ -1,0 +1,11 @@
+nav:
+  - Home: index.md
+  - Overview:
+    - 性能调优工具链全景: overview/toolchain.md
+    - 性能数据介绍: data/introduction.md
+    - 性能分析与调优指南: guides/index.md
+  - PyTorch Profiler: torch_npu_profiler
+  - msProf: msprof
+  - MSPTI: mspti
+  - msMonitor: msmonitor
+  - msprof-analyze: msprof-analyze

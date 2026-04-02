@@ -1,0 +1,15 @@
+[submodule "msinsight"]
+	path = msinsight
+	url = https://gitcode.com/Ascend/msinsight
+[submodule "msprof"]
+	path = msprof
+	url = https://gitcode.com/Ascend/msprof.git
+[submodule "mspti"]
+	path = mspti
+	url = https://gitcode.com/Ascend/mspti.git
+[submodule "msprof-analyze"]
+	path = msprof-analyze
+	url = https://gitcode.com/Ascend/msprof-analyze.git
+[submodule "msmonitor"]
+	path = msmonitor
+	url = https://gitcode.com/Ascend/msmonitor.git

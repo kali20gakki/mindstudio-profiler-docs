@@ -1,0 +1,7 @@
+collapse_single_pages: true
+nav:
+  - index.md
+  - api_reference.md
+  - schedule_reference.md
+  - profiler_config_reference.md
+  - experimental_config_reference.md
