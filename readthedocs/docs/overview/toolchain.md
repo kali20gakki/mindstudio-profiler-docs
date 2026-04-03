@@ -271,31 +271,97 @@ hide:
 </div>
 
 <script>
-const preview = document.getElementById('dynamic-preview');
-const pTitle = document.getElementById('pre-title');
-const pDesc = document.getElementById('pre-desc');
-const container = document.getElementById('container');
-const targets = document.querySelectorAll('.ai-arch-container .module, .ai-arch-container .tool-card');
+(function () {
+    const targetHrefMap = {
+        'msprof-analyze': '../../msprof-analyze/',
+        'msAgent': 'https://github.com/kali20gakki/msAgent',
+        'msMonitor': '../../msmonitor/',
+        'PyTorch Profiler': '../../torch_npu_profiler/',
+        'MindSpore Profiler': 'https://www.mindspore.cn/mindinsight/docs/zh-CN/r2.3/performance_profiling_ascend.html',
+        'msProf': '../../msprof/',
+        'MSTX': 'https://gitcode.com/Ascend/mstx',
+        'MSPTI': '../../mspti/',
+        'MindStudio Insight': 'https://gitcode.com/Ascend/msinsight'
+    };
 
-targets.forEach((target) => {
-    target.addEventListener('mouseenter', () => {
-        if (window.innerWidth <= 850) return;
+    function initToolchainMap() {
+        const arch = document.querySelector('.ai-arch-container');
+        if (!arch || arch.dataset.initialized === 'true') {
+            return;
+        }
 
-        pTitle.innerText = target.getAttribute('data-title');
-        pDesc.innerText = target.getAttribute('data-desc');
+        arch.dataset.initialized = 'true';
 
-        const rect = target.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
+        const preview = arch.querySelector('#dynamic-preview');
+        const pTitle = arch.querySelector('#pre-title');
+        const pDesc = arch.querySelector('#pre-desc');
+        const container = arch.querySelector('#container');
+        const targets = arch.querySelectorAll('.module, .tool-card');
 
-        preview.style.top = (rect.top - containerRect.top) + 'px';
-        preview.style.left = (rect.right - containerRect.left + 15) + 'px';
-        preview.classList.add('active');
-    });
+        if (!preview || !pTitle || !pDesc || !container || !targets.length) {
+            return;
+        }
 
-    target.addEventListener('mouseleave', () => {
-        preview.classList.remove('active');
-    });
-});
+        const hidePreview = () => {
+            preview.classList.remove('active');
+        };
+
+        const showPreview = (target) => {
+            if (window.innerWidth <= 850) {
+                return;
+            }
+
+            pTitle.innerText = target.getAttribute('data-title') || '';
+            pDesc.innerText = target.getAttribute('data-desc') || '';
+
+            const rect = target.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+
+            preview.style.top = (rect.top - containerRect.top) + 'px';
+            preview.style.left = (rect.right - containerRect.left + 15) + 'px';
+            preview.classList.add('active');
+        };
+
+        const navigateToTarget = (target) => {
+            const title = target.getAttribute('data-title') || '';
+            const href = targetHrefMap[title];
+            if (!href) {
+                return;
+            }
+
+            window.location.assign(href);
+        };
+
+        container.addEventListener('mouseleave', hidePreview);
+
+        targets.forEach((target) => {
+            target.setAttribute('role', 'link');
+            target.setAttribute('tabindex', '0');
+
+            target.addEventListener('mouseenter', () => showPreview(target));
+            target.addEventListener('focus', () => showPreview(target));
+            target.addEventListener('mouseleave', hidePreview);
+            target.addEventListener('blur', hidePreview);
+            target.addEventListener('click', () => navigateToTarget(target));
+            target.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    navigateToTarget(target);
+                }
+            });
+        });
+    }
+
+    if (typeof document$ !== 'undefined' && typeof document$.subscribe === 'function') {
+        document$.subscribe(initToolchainMap);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initToolchainMap, { once: true });
+    } else {
+        initToolchainMap();
+    }
+})();
 </script>
 
 ## 工具链选择建议
@@ -309,8 +375,6 @@ targets.forEach((target) => {
 
 
 ## 性能数据
-
-需要使用 `PyTorch Profiler` 或 `MindSpore Profiler` 采集。  
 
 | 数据类型            | 说明                                                                 |
 |------------------|--------------------------------------------------------------------|
@@ -363,31 +427,31 @@ targets.forEach((target) => {
 
 <div class="grid cards" markdown>
 
--   **[msProf](../msprof/)**
+-   **[msProf](../msprof/index.md)**
 
     ---
 
     采集与解析 CANN 平台及昇腾 AI 处理器的软硬件性能数据。
 
--   **[PyTorch Profiler](../torch_npu_profiler/)**
+-   **[PyTorch Profiler](../torch_npu_profiler/index.md)**
 
     ---
 
     基于PyTorch框架开发的昇腾软硬件性能调优工具。
 
--   **[MSPTI](../mspti/)**
+-   **[MSPTI](../mspti/index.md)**
 
     ---
 
     面向昇腾设备的 Profiling API 集合。
 
--   **[msMonitor](../msmonitor/)**
+-   **[msMonitor](../msmonitor/index.md)**
 
     ---
 
     面向昇腾集群场景的在线性能监控与动态采集工具。
 
--   **[msprof-analyze](../msprof-analyze/)**
+-   **[msprof-analyze](../msprof-analyze/index.md)**
 
     ---
 

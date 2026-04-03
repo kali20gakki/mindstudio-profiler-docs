@@ -115,7 +115,8 @@ DISPLAY_DIR_WHITELIST = {
     "getting_started",
     "user_guide",
     "advanced_features",
-    "developer_guide",
+    "c_api",
+    "python_api"
 }
 
 DISPLAY_FILE_WHITELIST = {
