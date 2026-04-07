@@ -17,8 +17,8 @@ hide:
 </p>
 
 <p class="home-actions">
-  <a class="md-button md-button--primary" href="./overview/toolchain/">查看工具全景</a>
-  <a class="md-button" href="https://www.hiascend.com/">进入昇腾社区</a>
+  <a class="md-button md-button--primary" href="./overview/">查看工具全景</a>
+  <a class="md-button" href="https://www.hiascend.com/developer/software/mindstudio">进入昇腾社区</a>
 </p>
 
 <style>
@@ -287,14 +287,14 @@ hide:
 <script>
 (function () {
     const targetHrefMap = {
-        'msprof-analyze': '../../msprof-analyze/',
+        'msprof-analyze': './msprof-analyze/',
         'msAgent': 'https://github.com/kali20gakki/msAgent',
-        'msMonitor': '../../msmonitor/',
-        'PyTorch Profiler': '../../torch_npu_profiler/',
+        'msMonitor': './msmonitor/',
+        'PyTorch Profiler': './torch_npu_profiler/',
         'MindSpore Profiler': 'https://www.mindspore.cn/mindinsight/docs/zh-CN/r2.3/performance_profiling_ascend.html',
-        'msProf': '../../msprof/',
+        'msProf': './msprof/',
         'MSTX': 'https://gitcode.com/Ascend/mstx',
-        'MSPTI': '../../mspti/',
+        'MSPTI': './mspti/',
         'MindStudio Insight': 'https://gitcode.com/Ascend/msinsight'
     };
 
@@ -377,5 +377,3 @@ hide:
     }
 })();
 </script>
-
-

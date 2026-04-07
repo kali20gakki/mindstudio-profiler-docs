@@ -1,11 +1,13 @@
----
+﻿---
 hide:
   - navigation
   - toc
 ---
 
 
-# 性能调优工具链全景
+# 性能调优工具全景
+
+## 性能调优工具链
 
 <style>
 .ai-arch-container {
@@ -364,26 +366,55 @@ hide:
 })();
 </script>
 
-## 工具链选择建议
+## 性能数据与采集工具
+
+MindStudio 提供多种性能数据采集能力，可覆盖 AI 框架层、CANN 层和 NPU 硬件层，下图展示了“性能数据”与“采集工具”之间的对应关系。
+
+![profiling-data](../assets/images/profling-data.png)
+
+<style>
+.md-typeset table {
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>
+
+### 按采集入口选择工具
+
+从采集入口看，性能数据采集主要分为两类：
+
+* msProf 采集工具：主要采集 CANN 层和 NPU 硬件层数据，是其他 Profiling 采集接口的基础能力。
+* AI 框架 Profiler 接口采集：在 `msProf` 能力之上，进一步补充 AI 框架层数据采集与解析，是最常用的方式。当前主要包括 Ascend PyTorch Profiler 和 MindSpore Profiler。此外，一些训练或推理套件还会在此基础上进一步封装，例如 MindSpeed-MM、MindFormers、vLLM 等，可直接通过套件接口调用。
+
+| 采集工具 | 特点 | 推荐场景 |
+|---|---|---|
+| Ascend PyTorch Profiler | 对标 PyTorch GPU 场景的使用方式，支持同时采集 PyTorch 框架层和昇腾软硬件层数据。 | PyTorch 框架模型的常规性能分析 |
+| MindSpore Profiler | 与 MindSpore 深度集成，接口简单，使用成本低。 | MindSpore 框架模型的常规性能分析 |
+| msProf | 采集 CANN 层与 NPU 层性能数据，不包含 AI 框架层数据，是其他工具的底座。 | 各类训练和推理场景，尤其适合非 PyTorch/MindSpore 框架，或需要精细控制采集过程的场景 |
+
+### 按采集方式选择方案
+
+从功能特性看，性能采集可分为常规采集、动态采集和轻量化在线监测三类。三种方式的侧重点不同：常规采集适合深度分析，动态采集适合长时间运行任务，轻量化采集适合常态化在线监控。
 
 | 采集方式 | 特点 | 推荐场景 |
-| --- | --- | --- |
-| msprof命令行 | 功能全面，支持采集AI任务性能、系统数据，提供解析能力 | 各类训练/推理场景，特别是非PyTorch/MindSpore框架或需精细控制采集过程 |
-| torch_npu.profiler | API接口，对标PyTorch GPU生态，无缝迁移 | PyTorch框架模型的常规性能分析 |
-| mindspore.profiler | 与MindSpore深度集成，使用简单 | MindSpore框架模型的常规性能分析 |
-| dynamic_profile动态采集 | 可随时开启/停止，动态修改配置，无需改动脚本 | 启停成本高的场景（超大规模集群、长时间运行任务） |
+|---|---|---|
+| 常规采集 | 预先设置采集周期或执行全量采集，落盘详细性能数据。 | 常规性能分析 |
+| `dynamic_profile` 动态采集 | 在模型训练或推理过程中可按需开启采集、动态修改采集配置，无需频繁改动脚本代码。 | 启停成本高的场景，例如超大规模训练 |
+| `msMonitor` 轻量化采集 | 采集关键性能指标，如利用率、带宽等，具有数据量小、解析快、开销低的特点，支持实时运行。 | 实时性能监控，以及大集群场景下的性能问题快速定界；适合发现资源瓶颈或异常，不用于算子级深度定位 |
 
+### 性能数据类型说明
 
-## 性能数据
+性能数据按层级进行划分，各类型数据的含义如下表所示。
 
-| 数据类型            | 说明                                                                 |
-|------------------|--------------------------------------------------------------------|
-| Python调用栈        | 记录Python代码的执行过程，各个函数的调用关系与耗时情况。                                    |
-| AI框架层Trace       | 记录AI框架（如PyTorch）算子下发耗时。 AI框架层-->CANN层为第一级下发流水。                     |
-| CANN Trace       | 包含 AscendCL、GE、Runtime 组件以及 Node（算子）的耗时数据，CANN层-->Device为第二级下发流水。  |
-| Ascend Hardware  | 底层 NPU 数据，即任务调度信息。记录 AI 任务运行时，各个 Task 在不同加速器下的执行耗时以及 AI Core 性能指标。 |
-| Communication    | 记录各个通信域下的通信算子信息，包含通信带宽、数据传输量等信息。                                   |
-| Overlap Analysis | 按照NPU是否在执行通信或计算任务进行划分，拆解成计算、通信、通信未与计算掩盖、空闲这四个维度，评估计算与通信的并行效率       |
+| 数据类型 | 说明 |
+|---|---|
+| Python 调用栈 | 记录 Python 代码执行过程中的函数调用关系及耗时情况。 |
+| AI 框架层 Trace | 记录 AI 框架（如 PyTorch）算子下发耗时。AI 框架层到 CANN 层构成第一级下发流水。 |
+| CANN Trace | 包含 AscendCL、GE、Runtime 组件及 Node（算子）的耗时数据。CANN 层到 Device 构成第二级下发流水。 |
+| Ascend Hardware | 底层 NPU 任务调度数据，记录 AI 任务运行时各 Task 在不同加速器上的执行耗时，以及 AI Core 性能指标。 |
+| Communication | 记录各个通信域下的通信算子信息，包括通信带宽、数据传输量等。 |
+| Overlap Analysis | 按 NPU 是否执行通信或计算任务进行划分，拆解为计算、通信、通信未与计算掩盖、空闲四个维度，用于评估计算与通信的并行效率。 |
+
 
 ## 相关入口
 
@@ -427,7 +458,7 @@ hide:
 
 <div class="grid cards" markdown>
 
--   **[msProf](../msprof/index.md)**
+-   **[msProf](../msprof/)**
 
     ---
 
@@ -439,7 +470,7 @@ hide:
 
     基于PyTorch框架开发的昇腾软硬件性能调优工具。
 
--   **[MSPTI](../mspti/index.md)**
+-   **[MSPTI](../mspti/)**
 
     ---
 
@@ -451,10 +482,11 @@ hide:
 
     面向昇腾集群场景的在线性能监控与动态采集工具。
 
--   **[msprof-analyze](../msprof-analyze/index.md)**
+-   **[msprof-analyze](../msprof-analyze/)**
 
     ---
 
     面向 AI 训练与推理场景的性能分析工具，具备性能比对、集群分析、专家建议等功能。
 
 </div>
+

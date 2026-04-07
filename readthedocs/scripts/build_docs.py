@@ -37,8 +37,9 @@ TOOLS = [
         "source_subdir": "docs/zh",
         "repo_readme": "README.md",
         "entry_points": [
-            ("工具介绍", "source/index.md"),
-            ("安装指南", "source/mspti_install_guide.md"),
+            ("快速上手", "source/getting_started/quick_start.md"),
+            ("安装指南", "source/getting_started/mspti_install_guide.md"),
+            ("样例指南", "source/getting_started/samples_guide.md"),
             ("C API", "source/c_api/index.md"),
             ("Python API", "source/python_api/index.md"),
         ],
@@ -52,10 +53,8 @@ TOOLS = [
         "source_subdir": "docs/zh",
         "repo_readme": "README.md",
         "entry_points": [
-            ("安装指南", "source/install_guide.md"),
-            ("npumonitor 使用说明", "source/npumonitor_instruct.md"),
-            ("nputrace 使用说明", "source/nputrace_instruct.md"),
-            ("dyno 使用说明", "source/dyno_instruct.md"),
+            ("快速上手", "source/getting_started/quick_start.md"),
+            ("安装指南", "source/getting_started/install_guide.md"),
             ("常见问题", "source/faq.md"),
         ],
     },
@@ -95,7 +94,6 @@ NON_NAV_NAMES = {
 
 NAV_ORDER = [
     "index.md",
-    "overview.md",
     "quick_start.md",
     "getting_started",
     "install_guide.md",
@@ -116,7 +114,8 @@ DISPLAY_DIR_WHITELIST = {
     "user_guide",
     "advanced_features",
     "c_api",
-    "python_api"
+    "python_api",
+    "figures"
 }
 
 DISPLAY_FILE_WHITELIST = {
@@ -200,8 +199,12 @@ def should_exclude(path: Path) -> bool:
     return path.name.lower() in EXCLUDED_NAMES
 
 
+def is_hidden_mspti_api_context_dir(path: Path) -> bool:
+    return False
+
+
 def should_hide_from_nav(path: Path) -> bool:
-    return path.name.lower() in NON_NAV_NAMES
+    return path.name.lower() in NON_NAV_NAMES or is_hidden_mspti_api_context_dir(path)
 
 
 def should_keep_display_path(path: Path) -> bool:
@@ -254,8 +257,30 @@ def repo_tree_url(tool: dict, repo_path: str) -> str:
     return f"{tool['repo_web_base']}/tree/{tool['branch']}/{repo_path}"
 
 
-def rewrite_missing_local_links(path: Path, root: Path, tool: dict) -> None:
-    content = path.read_text(encoding="utf-8")
+def normalize_repo_path(path: Path) -> Path:
+    normalized = Path(".")
+    for part in path.parts:
+        if part in {"", "."}:
+            continue
+        if part == "..":
+            normalized = normalized.parent
+            continue
+        normalized /= part
+    return normalized
+
+
+def rewrite_missing_local_links(path: Path, root: Path, tool: dict, current_repo_path: Path | None = None) -> None:
+    original_content = path.read_text(encoding="utf-8")
+    content = original_content
+    content = content.replace("](.//README.md", "](index.md")
+    content = content.replace("](./README.md", "](index.md")
+    content = content.replace("](../advanced_features/README.md", "](../advanced_features/index.md")
+    content = content.replace("](./source/advanced_features/README.md", "](./source/advanced_features/index.md")
+    content = content.replace("](./source/c_api/README.md", "](./source/c_api/index.md")
+    content = content.replace("](./source/python_api/README.md", "](./source/python_api/index.md")
+    content = content.replace("../../msprof-analyze/", "../../msprof-analyze/index.md")
+    if current_repo_path is None:
+        current_repo_path = Path(tool["source_subdir"]) / path.relative_to(root)
 
     def replace_markdown_link(match: re.Match[str]) -> str:
         label = match.group(1)
@@ -268,21 +293,35 @@ def rewrite_missing_local_links(path: Path, root: Path, tool: dict) -> None:
         if not clean_target:
             return match.group(0)
 
+        root_resolved = root.resolve()
         candidate = (path.parent / clean_target).resolve()
         try:
-            candidate.relative_to(root.resolve())
+            candidate_relative = candidate.relative_to(root_resolved)
+            if candidate.name.lower() == "readme.md":
+                index_candidate = candidate.with_name("index.md")
+                if index_candidate.exists():
+                    rewritten_target = Path(index_candidate.relative_to(path.parent.resolve())).as_posix()
+                    return f"[{label}]({rewritten_target}{suffix})"
+
+            if candidate.exists():
+                return match.group(0)
+
+            repo_relative = Path(tool["source_subdir"]) / candidate_relative
+            if (tool["repo"] / repo_relative).exists():
+                remote = repo_tree_url(tool, repo_relative.as_posix()) if target.endswith("/") else repo_blob_url(tool, repo_relative.as_posix())
+                return f"[{label}]({remote}{suffix})"
+            return match.group(0)
         except ValueError:
+            repo_candidate = normalize_repo_path(current_repo_path.parent / clean_target)
+            if (tool["repo"] / repo_candidate).exists():
+                remote = repo_tree_url(tool, repo_candidate.as_posix()) if target.endswith("/") else repo_blob_url(tool, repo_candidate.as_posix())
+                return f"[{label}]({remote}{suffix})"
+            if repo_candidate.name.lower() == "readme.md" and (tool["repo"] / "README.md").exists():
+                return f"[{label}]({repo_blob_url(tool, 'README.md')}{suffix})"
             return match.group(0)
-
-        if candidate.exists():
-            return match.group(0)
-
-        repo_relative = Path(tool["source_subdir"]) / candidate.relative_to(root.resolve())
-        remote = repo_tree_url(tool, repo_relative.as_posix()) if target.endswith("/") else repo_blob_url(tool, repo_relative.as_posix())
-        return f"[{label}]({remote}{suffix})"
 
     rewritten = re.sub(r"\[([^\]]+)\]\(([^)]+?)(#[^)]+)?\)", replace_markdown_link, content)
-    if rewritten != content:
+    if rewritten != original_content:
         path.write_text(rewritten, encoding="utf-8")
 
 
@@ -462,9 +501,10 @@ def rewrite_repo_readme_links(content: str | None, tool: dict, source_root: Path
         filtered_lines.append(line)
 
     rewritten = "\n".join(filtered_lines) + "\n"
+    rewritten = rewritten.replace("./source/LICENSE", repo_blob_url(tool, "docs/LICENSE"))
     temp_readme = source_root.parent / "_repo_readme_rewrite.md"
     temp_readme.write_text(rewritten, encoding="utf-8")
-    rewrite_missing_local_links(temp_readme, source_root, tool)
+    rewrite_missing_local_links(temp_readme, source_root, tool, current_repo_path=Path(tool["repo_readme"]))
     final_text = temp_readme.read_text(encoding="utf-8")
     temp_readme.unlink(missing_ok=True)
     return final_text
@@ -479,6 +519,14 @@ def generate_tool_page(tool: dict) -> None:
     export_latest_branch(tool["repo"], tool["branch"], tool["source_subdir"], source_root)
     filter_display_tree(source_root)
     build_directory_indexes(source_root, tool["title"])
+    if tool["slug"] == "mspti":
+        for api_dir in ("c_api", "python_api"):
+            api_root = source_root / api_dir
+            if api_root.exists():
+                write_directory_nav(api_root)
+                context_dir = api_root / "context"
+                if context_dir.exists():
+                    write_directory_nav(context_dir)
     for markdown_path in source_root.rglob("*.md"):
         rewrite_missing_local_links(markdown_path, source_root, tool)
     write_tool_nav(tool_root / ".nav.yml", tool)
@@ -487,15 +535,7 @@ def generate_tool_page(tool: dict) -> None:
     repo_notice = "\n".join(
         [
             "!!! info",
-            f"    仓库链接: [{tool['title']}]({tool['repo_web_base']})",
-            "",
-        ]
-    )
-    notice = "\n".join(
-        [
-            "!!! info",
-            f"    本页来自 `{tool['repo'].name}` 仓库根目录的 `README.md`，",
-            "    构建时直接从 `origin/master` 导出。",
+            f"    更多信息，欢迎查看源码仓: [{tool['title']}]({tool['repo_web_base']})",
             "",
         ]
     )
