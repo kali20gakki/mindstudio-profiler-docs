@@ -6,3 +6,5 @@ nav:
   - MSPTI: mspti
   - msMonitor: msmonitor
   - msprof-analyze: msprof-analyze
+  - MindStudio Insight: msinsight
+  - msAgent: msagent

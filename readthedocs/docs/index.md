@@ -288,14 +288,14 @@ hide:
 (function () {
     const targetHrefMap = {
         'msprof-analyze': './msprof-analyze/',
-        'msAgent': 'https://github.com/kali20gakki/msAgent',
+        'MindStudio Insight': './msinsight/',
+        'msAgent': './msagent/',
         'msMonitor': './msmonitor/',
         'PyTorch Profiler': './torch_npu_profiler/',
         'MindSpore Profiler': 'https://www.mindspore.cn/mindinsight/docs/zh-CN/r2.3/performance_profiling_ascend.html',
         'msProf': './msprof/',
         'MSTX': 'https://gitcode.com/Ascend/mstx',
-        'MSPTI': './mspti/',
-        'MindStudio Insight': 'https://gitcode.com/Ascend/msinsight'
+        'MSPTI': './mspti/'
     };
 
     function initToolchainMap() {

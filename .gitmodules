@@ -1,15 +1,24 @@
 [submodule "msinsight"]
 	path = msinsight
-	url = https://gitcode.com/Ascend/msinsight
+	url = https://gitcode.com/Ascend/msinsight.git
+	branch = master
+[submodule "msagent"]
+	path = msagent
+	url = https://gitcode.com/Ascend/msagent.git
+	branch = master
 [submodule "msprof"]
 	path = msprof
 	url = https://gitcode.com/Ascend/msprof.git
+	branch = master
 [submodule "mspti"]
 	path = mspti
 	url = https://gitcode.com/Ascend/mspti.git
+	branch = master
 [submodule "msprof-analyze"]
 	path = msprof-analyze
 	url = https://gitcode.com/Ascend/msprof-analyze.git
+	branch = master
 [submodule "msmonitor"]
 	path = msmonitor
 	url = https://gitcode.com/Ascend/msmonitor.git
+	branch = master

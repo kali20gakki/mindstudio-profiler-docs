@@ -7,11 +7,7 @@ build:
   jobs:
     post_checkout:
       - git submodule sync --recursive
-      - git submodule update --init --recursive
-      - git -C msprof fetch origin master && git -C msprof checkout --detach origin/master
-      - git -C mspti fetch origin master && git -C mspti checkout --detach origin/master
-      - git -C msmonitor fetch origin master && git -C msmonitor checkout --detach origin/master
-      - git -C msprof-analyze fetch origin master && git -C msprof-analyze checkout --detach origin/master
+      - git submodule update --init --recursive --remote
     pre_build:
       - python readthedocs/scripts/build_docs.py
 

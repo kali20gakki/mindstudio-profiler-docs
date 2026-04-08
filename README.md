@@ -34,6 +34,7 @@ git clone --recurse-submodules <repo-url>
 cd mindstudio-profiler-docs
 git submodule sync --recursive
 git submodule update --init --recursive
+git submodule update --remote --recursive
 ```
 
 安装文档依赖：

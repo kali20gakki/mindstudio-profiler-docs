@@ -14,6 +14,32 @@ DOCS_ROOT = ROOT / "readthedocs" / "docs"
 
 TOOLS = [
     {
+        "slug": "msinsight",
+        "title": "MindStudio Insight",
+        "branch": "master",
+        "summary": "可视化性能分析工具，覆盖安装、快速上手、基础操作、调优指引与开发者文档。",
+        "repo": ROOT / "msinsight",
+        "source_subdir": "docs/zh",
+        "repo_readme": "README.md",
+        "entry_points": [
+            ("总体概览", "source/user_guide/overview.md"),
+            ("安装指南", "source/user_guide/mindstudio_insight_install_guide.md"),
+            ("快速上手", "source/user_guide/quick_start/system_tuning_quick_start.md"),
+            ("基本操作", "source/user_guide/basic_operations.md"),
+            ("开发者指南", "source/developer_guide/development_guide.md"),
+        ],
+    },
+    {
+        "slug": "msagent",
+        "title": "msAgent",
+        "branch": "master",
+        "summary": "面向 Ascend NPU 场景的性能问题定位 Agent，提供性能分析与归因辅助能力。",
+        "repo": ROOT / "msagent",
+        "source_subdir": None,
+        "repo_readme": "README.md",
+        "entry_points": [],
+    },
+    {
         "slug": "msprof",
         "title": "msprof",
         "branch": "master",
@@ -162,15 +188,27 @@ def export_latest_branch(repo: Path, branch: str, source_subdir: str, destinatio
 
 
 def export_text_file(repo: Path, branch: str, repo_path: str) -> str:
-    completed = subprocess.run(
+    candidates = [f"origin/{branch}:{repo_path}", f"HEAD:{repo_path}"]
+    for candidate in candidates:
+        completed = subprocess.run(
+            ["git", "-C", str(repo), "show", candidate],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        if completed.returncode == 0:
+            return completed.stdout
+
+    file_path = repo / repo_path
+    if file_path.exists():
+        return file_path.read_text(encoding="utf-8", errors="replace")
+
+    raise subprocess.CalledProcessError(
+        128,
         ["git", "-C", str(repo), "show", f"origin/{branch}:{repo_path}"],
-        check=True,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
     )
-    return completed.stdout
 
 
 def reset_generated_targets() -> None:
@@ -468,7 +506,8 @@ def write_tool_nav(path: Path, tool: dict) -> None:
         lines.append("  - 推荐阅读:")
         for relative in featured_entries:
             lines.append(f"    - {relative}")
-    lines.append("  - 文档目录: source")
+    if tool.get("source_subdir") and (path.parent / "source").exists():
+        lines.append("  - 文档目录: source")
     lines.append("")
     path.write_text("\n".join(lines), encoding="utf-8")
 
@@ -515,23 +554,26 @@ def generate_tool_page(tool: dict) -> None:
     tool_root = DOCS_ROOT / tool["slug"]
     source_root = tool_root / "source"
     tool_root.mkdir(parents=True, exist_ok=True)
+    source_subdir = tool.get("source_subdir")
 
-    export_latest_branch(tool["repo"], tool["branch"], tool["source_subdir"], source_root)
-    filter_display_tree(source_root)
-    build_directory_indexes(source_root, tool["title"])
-    if tool["slug"] == "mspti":
-        for api_dir in ("c_api", "python_api"):
-            api_root = source_root / api_dir
-            if api_root.exists():
-                write_directory_nav(api_root)
-                context_dir = api_root / "context"
-                if context_dir.exists():
-                    write_directory_nav(context_dir)
-    for markdown_path in source_root.rglob("*.md"):
-        rewrite_missing_local_links(markdown_path, source_root, tool)
+    if source_subdir:
+        export_latest_branch(tool["repo"], tool["branch"], source_subdir, source_root)
+        filter_display_tree(source_root)
+        build_directory_indexes(source_root, tool["title"])
+        if tool["slug"] == "mspti":
+            for api_dir in ("c_api", "python_api"):
+                api_root = source_root / api_dir
+                if api_root.exists():
+                    write_directory_nav(api_root)
+                    context_dir = api_root / "context"
+                    if context_dir.exists():
+                        write_directory_nav(context_dir)
+        for markdown_path in source_root.rglob("*.md"):
+            rewrite_missing_local_links(markdown_path, source_root, tool)
     write_tool_nav(tool_root / ".nav.yml", tool)
     readme_text = export_text_file(tool["repo"], tool["branch"], tool["repo_readme"])
-    readme_text = rewrite_repo_readme_links(readme_text, tool, source_root)
+    if source_subdir:
+        readme_text = rewrite_repo_readme_links(readme_text, tool, source_root)
     repo_notice = "\n".join(
         [
             "!!! info",

@@ -275,15 +275,15 @@ hide:
 <script>
 (function () {
     const targetHrefMap = {
-        'msprof-analyze': '../../msprof-analyze/',
-        'msAgent': 'https://github.com/kali20gakki/msAgent',
-        'msMonitor': '../../msmonitor/',
-        'PyTorch Profiler': '../../torch_npu_profiler/',
+        'msprof-analyze': '../msprof-analyze/',
+        'MindStudio Insight': '../msinsight/',
+        'msAgent': '../msagent/',
+        'msMonitor': '../msmonitor/',
+        'PyTorch Profiler': '../torch_npu_profiler/',
         'MindSpore Profiler': 'https://www.mindspore.cn/mindinsight/docs/zh-CN/r2.3/performance_profiling_ascend.html',
-        'msProf': '../../msprof/',
+        'msProf': '../msprof/',
         'MSTX': 'https://gitcode.com/Ascend/mstx',
-        'MSPTI': '../../mspti/',
-        'MindStudio Insight': 'https://gitcode.com/Ascend/msinsight'
+        'MSPTI': '../mspti/'
     };
 
     function initToolchainMap() {
@@ -487,6 +487,18 @@ MindStudio 提供多种性能数据采集能力，可覆盖 AI 框架层、CANN 
     ---
 
     面向 AI 训练与推理场景的性能分析工具，具备性能比对、集群分析、专家建议等功能。
+
+-   **[MindStudio Insight](../msinsight/)**
+
+    ---
+
+    面向昇腾场景的可视化性能分析工具，适合查看 Timeline、算子清单及瓶颈定位结果。
+
+-   **[msAgent](../msagent/)**
+
+    ---
+
+    面向性能问题定位场景的智能 Agent 工具，可辅助开发者更快完成分析与归因。
 
 </div>
 

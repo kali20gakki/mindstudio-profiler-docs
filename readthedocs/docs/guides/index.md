@@ -14,3 +14,5 @@
 
 - [性能调优工具全景](../overview/)
 - [msprof-analyze](../msprof-analyze/)
+- [MindStudio Insight](../msinsight/)
+- [msAgent](../msagent/)
