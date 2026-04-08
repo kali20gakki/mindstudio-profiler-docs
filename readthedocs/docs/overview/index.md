@@ -499,6 +499,13 @@ MindStudio 提供多种性能数据采集能力，可覆盖 AI 框架层、CANN 
     ---
 
     面向性能问题定位场景的智能 Agent 工具，可辅助开发者更快完成分析与归因。
+ 
+- **[Profiling Cases](../profiling-cases/)**
+
+    ---
+
+    典型场景性能调优案例库。
+
 
 </div>
 
