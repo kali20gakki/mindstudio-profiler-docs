@@ -149,3 +149,5 @@ readthedocs/docs/msprof/
 readthedocs/docs/mspti/
 readthedocs/docs/msmonitor/
 readthedocs/docs/msprof-analyze/
+
+.omx/

@@ -8,6 +8,12 @@ title: Profiling Cases
 
 <div class="grid cards" markdown>
 
+-   **[集群场景动态 Profile 性能数据采集与分析指导](./dynamic-profile-case/)**
+
+    ---
+
+    面向集群长任务场景，串联 dynamic_profile 动态采集、msprof-analyze 集群分析与 advisor、MindStudio Insight 汇总查看和指定 rank 下钻。
+
 -   **[强化学习场景性能数据采集及分析指导](./reinforcement-learning-case/)**
 
     ---
